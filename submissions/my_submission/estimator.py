@@ -70,8 +70,8 @@ transformer = make_column_transformer(
 
 pipe = make_pipeline(
     transformer,
-    SimpleImputer(strategy='most_frequent'),
-    RandomForestClassifier(max_depth=5, n_estimators=10)
+    SimpleImputer(strategy='mean'),
+    RandomForestClassifier(max_depth=5, n_estimators=15, class_weight="balanced")
 )
 
 
