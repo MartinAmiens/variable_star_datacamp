@@ -6,6 +6,7 @@ from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
 
 
 def fold_time_series(time_point, period, div_period):
@@ -61,8 +62,11 @@ cols = [
     'div_period',
 ]
 
+num_features = ['magnitude_b', 'magnitude_r', 'sigma_flux_b', 'sigma_flux_r']
+scaler = StandardScaler()
 common = ['period', 'div_period']
 transformer = make_column_transformer(
+    (scaler, num_features),
     (transformer_r, common + ['time_points_r', 'light_points_r']),
     (transformer_b, common + ['time_points_b', 'light_points_b']),
     ('passthrough', cols)
@@ -71,7 +75,11 @@ transformer = make_column_transformer(
 pipe = make_pipeline(
     transformer,
     SimpleImputer(strategy='mean'),
-    GradientBoostingClassifier(n_estimators=10, max_depth=5, random_state=42)
+    GradientBoostingClassifier(n_estimators=200,
+                               learning_rate=0.03,
+                               max_depth=4,
+                               random_state=42,
+                               subsample=0.8)
 )
 
 
