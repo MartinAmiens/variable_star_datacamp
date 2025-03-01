@@ -4,10 +4,11 @@ import numpy as np
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import BaggingClassifier
+
 
 
 def fold_time_series(time_point, period, div_period):
@@ -70,18 +71,18 @@ common = ['period', 'div_period']
 transformer = make_column_transformer(
     (transformer_r, common + ['time_points_r', 'light_points_r']),
     (transformer_b, common + ['time_points_b', 'light_points_b']),
+    (scaler,num_features),
     ('passthrough', cols)
 )
 
 # Modèle principal
-gbc = GradientBoostingClassifier(n_estimators=200, learning_rate=0.03, max_depth=4, 
-                                 random_state=42, subsample=0.8)
+gbc = HistGradientBoostingClassifier(max_iter=200, learning_rate=0.03, max_depth=4,
+                                     random_state=42, l2_regularization=1e-4)
 
 pipe = make_pipeline(
     transformer,
     SimpleImputer(strategy='mean'),
-    scaler,
-    BaggingClassifier(estimator=gbc, n_estimators=10, random_state=42)
+    BaggingClassifier(estimator=gbc, n_estimators=5, random_state=42)
 )
 
 
